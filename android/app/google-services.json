@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "838336268815",
+    "project_id": "docsme---userhistory",
+    "storage_bucket": "docsme---userhistory.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:838336268815:android:024d60a22661607ab2f17a",
+        "android_client_info": {
+          "package_name": "com.adapp.youtube_documenting"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "838336268815-9vdcv91n9u4eim5fgiecpoqndidhe8af.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adapp.youtube_documenting",
+            "certificate_hash": "a8da34333e8af7c31e262f0743def521c1e8c3a8"
+          }
+        },
+        {
+          "client_id": "838336268815-13pfjev7rfq0mfm08lsbbbee8rkab1ih.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDvXHcIc5shjnVLG565bW_tEWmcLM9x-r4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "838336268815-13pfjev7rfq0mfm08lsbbbee8rkab1ih.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

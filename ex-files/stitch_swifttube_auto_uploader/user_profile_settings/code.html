@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Settings - DOCSME</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;family=Sora:wght@600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-container": "#5c0000",
+                      "surface-variant": "#472f2b",
+                      "on-background": "#ffdad4",
+                      "on-primary-fixed-variant": "#930100",
+                      "outline-variant": "#603e39",
+                      "on-tertiary-fixed": "#1a1c1c",
+                      "inverse-on-surface": "#422a27",
+                      "on-error": "#690005",
+                      "error-container": "#93000a",
+                      "on-secondary-container": "#adb4ce",
+                      "on-tertiary-container": "#282a2a",
+                      "on-secondary-fixed-variant": "#3f465c",
+                      "on-secondary-fixed": "#131b2e",
+                      "surface-container-low": "#2b1613",
+                      "secondary-container": "#3f465c",
+                      "tertiary-fixed-dim": "#c6c6c7",
+                      "background": "#210e0b",
+                      "tertiary-container": "#909191",
+                      "error": "#ffb4ab",
+                      "primary": "#ffb4a8",
+                      "surface-container-lowest": "#1b0907",
+                      "surface-container-highest": "#472f2b",
+                      "secondary-fixed": "#dae2fd",
+                      "on-primary": "#690100",
+                      "surface-container": "#2f1a17",
+                      "on-secondary": "#283044",
+                      "surface-tint": "#ffb4a8",
+                      "on-surface-variant": "#ebbbb4",
+                      "on-tertiary-fixed-variant": "#454747",
+                      "inverse-primary": "#c00100",
+                      "inverse-surface": "#ffdad4",
+                      "on-error-container": "#ffdad6",
+                      "tertiary": "#c6c6c7",
+                      "tertiary-fixed": "#e2e2e2",
+                      "surface-bright": "#4c332f",
+                      "secondary-fixed-dim": "#bec6e0",
+                      "surface-dim": "#210e0b",
+                      "surface-container-high": "#3b2420",
+                      "on-surface": "#ffdad4",
+                      "primary-container": "#ff5540",
+                      "on-tertiary": "#2f3131",
+                      "on-primary-fixed": "#410000",
+                      "secondary": "#bec6e0",
+                      "outline": "#b18780",
+                      "surface": "#210e0b",
+                      "primary-fixed": "#ffdad4",
+                      "primary-fixed-dim": "#ffb4a8"
+              },
+              "borderRadius": {
+                      "DEFAULT": "1rem",
+                      "lg": "2rem",
+                      "xl": "3rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "base": "4px",
+                      "lg": "24px",
+                      "container-padding": "20px",
+                      "xl": "40px",
+                      "md": "16px",
+                      "sm": "8px",
+                      "xs": "4px"
+              },
+              "fontFamily": {
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Sora"
+                      ],
+                      "label-caps": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Sora"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "button-text": [
+                              "Sora"
+                      ]
+              },
+              "fontSize": {
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "button-text": [
+                              "16px",
+                              {
+                                      "lineHeight": "1",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+          /* Glassmorphism utility classes based on guidelines */
+          .glass-panel {
+              background-color: rgba(255, 255, 255, 0.05);
+              border: 1px solid rgba(255, 255, 255, 0.15);
+              backdrop-filter: blur(10px);
+          }
+          .glass-input {
+              background-color: #0F172A;
+              border: 1px solid rgba(255, 255, 255, 0.1);
+          }
+          .glass-input:focus {
+              border-color: #FF0000;
+              box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+              outline: none;
+          }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-background/80 dark:bg-background/80 backdrop-blur-xl docked full-width top-0 border-b border-white/10 sticky z-40">
+<div class="flex justify-between items-center w-full px-container-padding py-md">
+<button class="text-on-surface-variant hover:bg-surface-variant/20 transition-colors rounded-full p-2">
+<span class="material-symbols-outlined text-body-lg font-body-lg">bolt</span>
+</button>
+<h1 class="text-headline-md font-headline-md font-black text-primary dark:text-primary tracking-tighter">DOCSME</h1>
+<button class="text-on-surface-variant hover:bg-surface-variant/20 transition-colors rounded-full p-2">
+<span class="material-symbols-outlined text-body-lg font-body-lg">notifications</span>
+</button>
+</div>
+</header>
+<main class="px-container-padding py-lg max-w-4xl mx-auto space-y-xl">
+<!-- Page Header -->
+<div>
+<h2 class="text-headline-lg font-headline-lg mb-sm text-primary">Settings</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant">Manage your account and automation preferences.</p>
+</div>
+<!-- Bento Grid Layout for Settings -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<!-- Account Info Card -->
+<section class="glass-panel rounded-DEFAULT p-lg md:col-span-2">
+<div class="flex items-center mb-md">
+<span class="material-symbols-outlined text-primary mr-sm" style="font-variation-settings: 'FILL' 1;">manage_accounts</span>
+<h3 class="text-headline-md font-headline-md text-on-surface">Account info</h3>
+</div>
+<div class="flex flex-col md:flex-row gap-lg items-start md:items-center">
+<div class="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary/50 shrink-0">
+<img alt="User Avatar" class="object-cover w-full h-full" data-alt="A close-up portrait of a professional content creator looking directly at the camera with a confident expression. The lighting is moody and cinematic, consistent with a high-end dark mode aesthetic, featuring subtle electric red rim lighting. The background is a deeply blurred dark slate environment to keep focus strictly on the subject." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrVPkmoBSLW7NwcgN_PB8QO0qbrQKqz81GPSIDs7OJVEBPydq8zhmpxXqIfdC-AVkH62lE1-Vi2qfLeUnKZFw7nLRx4ClkfnneS7L6POJlWp0ZTyaXFyIQdTiAZsxRNJ98nTUeeBD0KqRlLSnkchAI5SouDdOJ-jsa9jAVVfy-GrhL_8LNeCxUfNsXD5ETeSpFetOqo1A0mDTEtfTYwu9a1LTMj3RUXx3XxAPtnr_ZR0Bdj7HfezHfPNtDYP77Q4X-Sn-sdTEYyJs"/>
+</div>
+<form class="flex-grow space-y-sm w-full">
+<div>
+<label class="block text-label-caps font-label-caps text-on-surface-variant mb-xs" for="displayName">DISPLAY NAME</label>
+<input class="glass-input w-full rounded-DEFAULT px-md py-sm text-body-lg font-body-lg text-on-surface transition-all" id="displayName" type="text" value="Alex Studio"/>
+</div>
+<div>
+<label class="block text-label-caps font-label-caps text-on-surface-variant mb-xs" for="email">EMAIL ADDRESS</label>
+<input class="glass-input w-full rounded-DEFAULT px-md py-sm text-body-lg font-body-lg text-on-surface/50 cursor-not-allowed" id="email" readonly="" type="email" value="alex@docsme.studio"/>
+</div>
+<div class="pt-sm">
+<button class="bg-primary-container text-on-primary-container font-button-text text-button-text py-sm px-lg rounded-full active:scale-95 transition-transform hover:bg-primary-container/90 shadow-[0_0_15px_rgba(255,85,64,0.3)]" type="button">Update Profile</button>
+</div>
+</form>
+</div>
+</section>
+<!-- Automation Preferences -->
+<section class="glass-panel rounded-DEFAULT p-lg space-y-lg">
+<div class="flex items-center mb-sm">
+<span class="material-symbols-outlined text-primary mr-sm" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+<h3 class="text-headline-md font-headline-md text-on-surface">Auto-Title Prefs</h3>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-md">Configure how DocsMe AI generates titles for your transcoded videos.</p>
+<div class="space-y-md">
+<label class="flex items-center justify-between cursor-pointer group">
+<span class="text-body-lg font-body-lg text-on-surface group-hover:text-primary transition-colors">Append Date</span>
+<div class="relative">
+<input checked="" class="sr-only" type="checkbox"/>
+<div class="block bg-surface-container-highest w-14 h-8 rounded-full border border-white/10"></div>
+<div class="dot absolute left-1 top-1 bg-primary w-6 h-6 rounded-full transition transform translate-x-6 shadow-[0_0_10px_rgba(255,85,64,0.5)]"></div>
+</div>
+</label>
+<label class="flex items-center justify-between cursor-pointer group">
+<span class="text-body-lg font-body-lg text-on-surface group-hover:text-primary transition-colors">Include Project Code</span>
+<div class="relative">
+<input class="sr-only" type="checkbox"/>
+<div class="block bg-surface-container-highest w-14 h-8 rounded-full border border-white/10"></div>
+<div class="dot absolute left-1 top-1 bg-on-surface-variant w-6 h-6 rounded-full transition"></div>
+</div>
+</label>
+<div>
+<label class="block text-label-caps font-label-caps text-on-surface-variant mb-xs" for="titleStyle">GENERATION STYLE</label>
+<select class="glass-input w-full rounded-DEFAULT px-md py-sm text-body-lg font-body-lg text-on-surface appearance-none bg-surface-container" id="titleStyle">
+<option>Aggressive &amp; Engaging</option>
+<option selected="">Descriptive &amp; Professional</option>
+<option>Minimalist</option>
+</select>
+</div>
+</div>
+</section>
+<!-- Metadata Defaults -->
+<section class="glass-panel rounded-DEFAULT p-lg space-y-lg flex flex-col justify-between">
+<div>
+<div class="flex items-center mb-sm">
+<span class="material-symbols-outlined text-primary mr-sm" style="font-variation-settings: 'FILL' 1;">description</span>
+<h3 class="text-headline-md font-headline-md text-on-surface">Default Description</h3>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-md">Set the boilerplate text injected into every new upload.</p>
+<textarea class="glass-input w-full rounded-DEFAULT px-md py-sm text-body-lg font-body-lg text-on-surface h-32 resize-none" placeholder="Enter default description template...">Shot on RED Komodo. Color graded in DaVinci Resolve.
+Produced by DocsMe Studio.
+
+Follow us on:
+[Social Links]</textarea>
+</div>
+<button class="w-full bg-surface-container-highest border border-white/10 text-on-surface font-button-text text-button-text py-sm px-lg rounded-full active:scale-95 transition-transform hover:border-primary/50 hover:text-primary mt-4" type="button">Save Template</button>
+</section>
+<!-- Playlist Routing -->
+<section class="glass-panel rounded-DEFAULT p-lg md:col-span-2">
+<div class="flex items-center justify-between mb-md">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-primary mr-sm" style="font-variation-settings: 'FILL' 1;">queue_music</span>
+<h3 class="text-headline-md font-headline-md text-on-surface">Auto-Playlist Selection</h3>
+</div>
+<span class="px-sm py-xs bg-primary/20 text-primary rounded-full text-label-caps font-label-caps border border-primary/30 flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> Active
+                    </span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-md">
+<!-- Rule Card -->
+<div class="bg-surface-container-low border border-white/5 rounded-DEFAULT p-md hover:border-primary/30 transition-colors">
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-sm">IF TAG CONTAINS</div>
+<div class="text-body-lg font-body-lg text-on-surface mb-md">#tutorial</div>
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-sm">ROUTE TO</div>
+<div class="bg-surface-container px-sm py-xs rounded flex items-center text-body-sm font-body-sm text-primary">
+<span class="material-symbols-outlined text-[16px] mr-1">folder</span> Education Hub
+                        </div>
+</div>
+<!-- Rule Card -->
+<div class="bg-surface-container-low border border-white/5 rounded-DEFAULT p-md hover:border-primary/30 transition-colors">
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-sm">IF TITLE CONTAINS</div>
+<div class="text-body-lg font-body-lg text-on-surface mb-md">vlog</div>
+<div class="text-label-caps font-label-caps text-on-surface-variant mb-sm">ROUTE TO</div>
+<div class="bg-surface-container px-sm py-xs rounded flex items-center text-body-sm font-body-sm text-primary">
+<span class="material-symbols-outlined text-[16px] mr-1">folder</span> Daily Drops
+                        </div>
+</div>
+<!-- Add Rule -->
+<button class="bg-surface-container-lowest border border-dashed border-white/20 rounded-DEFAULT p-md flex flex-col items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary/50 transition-colors min-h-[120px]">
+<span class="material-symbols-outlined mb-sm text-[32px]">add_circle</span>
+<span class="text-button-text font-button-text">Add Routing Rule</span>
+</button>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden bg-surface-container/20 dark:bg-surface-container/20 backdrop-blur-[30px] fixed bottom-lg left-1/2 -translate-x-1/2 w-[90%] max-w-md rounded-full shadow-[0_0_20px_rgba(255,85,64,0.3)] border border-white/15 z-50 flex justify-around items-center px-md py-sm mx-auto">
+<a class="flex items-center justify-center text-on-surface-variant p-4 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">home</span>
+</a>
+<a class="flex items-center justify-center text-on-surface-variant p-4 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">video_library</span>
+</a>
+<a class="flex items-center justify-center bg-primary-container text-on-primary-container rounded-full p-4 scale-110 shadow-lg hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+</a>
+</nav>
+</body></html>
