@@ -47,6 +47,14 @@ abstract final class AppTheme {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
       ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.surfaceContainerHigh,
+        contentTextStyle: GoogleFonts.inter(color: AppColors.onSurface),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
     );
   }
 }

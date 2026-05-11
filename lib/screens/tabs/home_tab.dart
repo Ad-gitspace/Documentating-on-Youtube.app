@@ -99,8 +99,9 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
     } else if (action == 'queue') {
       context.read<UploadManager>().enqueueUpload(path, uploadNow: false);
     } else if (action == 'custom') {
+      final savedTemplate = context.read<UploadManager>().defaultDescription;
       final titleController = TextEditingController(text: 'DocsMe - ${DateTime.now().toIso8601String().split('T').first}');
-      final descController = TextEditingController(text: 'Uploaded via DocsMe App');
+      final descController = TextEditingController(text: savedTemplate);
       final tagsController = TextEditingController(text: 'DocsMe, Vlog, Daily');
 
       final result = await showDialog<Map<String, String>>(
@@ -302,68 +303,109 @@ class _HomeTabState extends State<HomeTab> with AutomaticKeepAliveClientMixin {
   // ── Activity Section ──────────────────────────────────────────────────────
 
   Widget _buildActivitySection(UploadManager manager) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 500),
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 0.1),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          ),
+        );
+      },
+      child: _getActivityWidget(manager),
+    );
+  }
+
+  Widget _getActivityWidget(UploadManager manager) {
     final current = manager.currentUpload;
 
     if (current != null) {
-      return _uploadingCard(current);
+      return Container(
+        key: const ValueKey('uploading'),
+        child: _uploadingCard(current),
+      );
     }
 
     final completed = manager.completed;
     if (completed.isNotEmpty) {
-      return _lastUploadCard(completed.first);
+      return Container(
+        key: const ValueKey('completed'),
+        child: _lastUploadCard(completed.first),
+      );
     }
 
-    return _noActivityCard();
+    return Container(
+      key: const ValueKey('empty'),
+      child: _noActivityCard(),
+    );
   }
 
   Widget _uploadingCard(UploadItem item) {
     final isProcessing = item.status == UploadStatus.processing;
+    final progressValue = (item.progress > 0 && item.progress <= 1.0) ? item.progress : null;
+    final progressPercent = (item.progress * 100).toInt();
 
     return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isProcessing ? AppColors.secondary : AppColors.primary,
-                  boxShadow: [
-                    BoxShadow(
-                      color: (isProcessing ? AppColors.secondary : AppColors.primary)
-                          .withValues(alpha: 0.5),
-                      blurRadius: 8,
+              Row(
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isProcessing ? AppColors.secondary : AppColors.primary,
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isProcessing ? AppColors.secondary : AppColors.primary)
+                              .withValues(alpha: 0.5),
+                          blurRadius: 8,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: AppDimens.sm),
+                  Text(
+                    isProcessing ? 'PROCESSING' : 'UPLOADING',
+                    style: AppTypography.labelCaps.copyWith(
+                      color: isProcessing ? AppColors.secondary : AppColors.primary,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: AppDimens.sm),
-              Text(
-                isProcessing ? 'PROCESSING' : 'UPLOADING',
-                style: AppTypography.labelCaps.copyWith(
-                  color: isProcessing ? AppColors.secondary : AppColors.primary,
+              if (!isProcessing && progressValue != null)
+                Text(
+                  '$progressPercent%',
+                  style: AppTypography.labelCaps.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: AppDimens.md),
           Text(
             isProcessing
                 ? 'YouTube is processing your video…'
-                : 'Uploading to YouTube…',
+                : 'Uploading "${item.title}" to YouTube…',
             style: AppTypography.bodyLg.copyWith(color: AppColors.onBackground),
           ),
           const SizedBox(height: AppDimens.md),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
-              value: isProcessing
-                  ? null
-                  : (item.progress > 0 ? item.progress : null),
-              minHeight: 6,
+              value: isProcessing ? null : progressValue,
+              minHeight: 8,
               backgroundColor: Colors.white.withValues(alpha: 0.10),
               valueColor: AlwaysStoppedAnimation(
                   isProcessing ? AppColors.secondary : AppColors.primary),

@@ -56,6 +56,7 @@ class _MainShellState extends State<MainShell> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: AppColors.background,
         body: Stack(
           children: [

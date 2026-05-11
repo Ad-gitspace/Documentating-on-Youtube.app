@@ -40,8 +40,19 @@ class YouTubeService {
         ..privacyStatus = privacyStatus);
 
     final fileLength = await videoFile.length();
+    
+    // Create a stream that tracks progress as it is read by the uploader
+    int bytesRead = 0;
+    final progressStream = videoFile.openRead().map((chunk) {
+      bytesRead += chunk.length;
+      if (onProgress != null && fileLength > 0) {
+        onProgress(bytesRead / fileLength);
+      }
+      return chunk;
+    });
+
     final media = youtube.Media(
-      videoFile.openRead(),
+      progressStream,
       fileLength,
       contentType: 'video/*',
     );

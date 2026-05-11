@@ -7,6 +7,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/constants/app_dimens.dart';
 import '../../../widgets/glass_card.dart';
 import '../../../services/upload_manager.dart';
+import '../../../services/firebase_service.dart';
 
 /// Videos Tab — displays the user's queued and uploaded videos.
 ///
@@ -277,9 +278,79 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
     return videos
         .map((video) => Padding(
               padding: const EdgeInsets.only(bottom: AppDimens.md),
-              child: _videoCard(video),
+              child: _dismissibleVideoCard(video),
             ))
         .toList();
+  }
+
+  /// Wraps the video card in a [Dismissible] for swipe-to-delete.
+  Widget _dismissibleVideoCard(UploadItem video) {
+    return Dismissible(
+      key: Key(video.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        decoration: BoxDecoration(
+          color: AppColors.error.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(AppDimens.radiusDefault),
+        ),
+        child: const Icon(Icons.delete_forever, color: AppColors.error, size: 28),
+      ),
+      confirmDismiss: (_) => _confirmDelete(video),
+      onDismissed: (_) => _deleteVideo(video),
+      child: _videoCard(video),
+    );
+  }
+
+  Future<bool> _confirmDelete(UploadItem video) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surfaceContainerHigh,
+        title: Text('Delete Video?',
+            style: AppTypography.headlineMd.copyWith(color: AppColors.error)),
+        content: Text(
+          'Remove "${video.title}" from your list?\n\nThis will not delete the video from YouTube.',
+          style: AppTypography.bodyLg.copyWith(color: AppColors.onSurface),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel',
+                style: TextStyle(color: AppColors.onSurfaceVariant)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.errorContainer,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
+
+  void _deleteVideo(UploadItem video) {
+    context.read<UploadManager>().removeUpload(video.id);
+
+    // Also try to remove from Firestore if it was a completed upload.
+    if (video.videoId != null) {
+      try {
+        FirebaseService().deleteVideoRecord(video.videoId!);
+      } catch (e) {
+        debugPrint('Could not delete Firestore record: $e');
+      }
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('"${video.title}" removed'),
+      ),
+    );
   }
 
   Widget _videoCard(UploadItem video) {
@@ -358,13 +429,26 @@ class _VideosTabState extends State<VideosTab> with AutomaticKeepAliveClientMixi
               ],
             ),
           ),
-          // Open player
+          // Play button for completed videos
           if (isComplete && video.videoId != null)
             IconButton(
-              icon: const Icon(Icons.open_in_new,
-                  color: AppColors.tertiary, size: 20),
+              icon: const Icon(Icons.play_circle_outline,
+                  color: AppColors.tertiary, size: 22),
               onPressed: () => _showPlayerDialog(context, video.videoId!),
+              tooltip: 'Play',
             ),
+          // Delete button for all videos
+          IconButton(
+            icon: Icon(Icons.delete_outline,
+                color: AppColors.error.withValues(alpha: 0.7), size: 22),
+            onPressed: () async {
+              final confirmed = await _confirmDelete(video);
+              if (confirmed && mounted) {
+                _deleteVideo(video);
+              }
+            },
+            tooltip: 'Delete',
+          ),
         ],
       ),
     );

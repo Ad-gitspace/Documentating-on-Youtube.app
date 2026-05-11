@@ -1,0 +1,18 @@
+New Reported Errors & Performance Issues: (Currently Gemini CLI did tried to resolve this)
+
+1. UI & Navigation:
+   - Navigation bar (Home, Video, Account) shifts/moves when the keyboard opens.
+   - Notification/Snackbar (e.g., "video deleted") color mismatch: Background is black, but text is also dark, making it unreadable.
+
+2. Performance & UX:
+   - App feels "laggy and heavy" throughout.
+   - Transitions between uploading and confirmation of success are missing or clunky.
+   - Overall app performance needs better optimization.
+
+3. Upload Logic:
+   - Status mismatch: Videos can get "stuck" in the uploading state.
+   - Closing the app/screen shows "interrupted" error, but the video has actually already been uploaded to YouTube.
+
+4. Technical Debt:
+   - Too many code files; suspected redundancy from older versions.
+   - Requires analysis for file cleanup and optimization.

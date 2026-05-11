@@ -69,9 +69,37 @@ class UploadManager extends ChangeNotifier {
 
   final List<UploadItem> _queue = [];
   bool _isProcessing = false;
+
   static const String _prefsKey = 'upload_queue_v1';
+  static const String _templateKey = 'default_description_template';
+
+  // ── Default Description Template ──────────────────────────────────────────
+
+  String _defaultDescription = 'Uploaded via DocsMe App';
+
+  /// The saved default description template. Used when no custom description
+  /// is specified during upload.
+  String get defaultDescription => _defaultDescription;
+
+  /// Loads the saved template from SharedPreferences.
+  Future<void> loadTemplate() async {
+    final prefs = await SharedPreferences.getInstance();
+    _defaultDescription = prefs.getString(_templateKey) ?? 'Uploaded via DocsMe App';
+  }
+
+  /// Saves a new default description template to SharedPreferences.
+  Future<void> saveTemplate(String template) async {
+    _defaultDescription = template;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_templateKey, template);
+    notifyListeners();
+  }
+
+  // ── Queue Initialization ──────────────────────────────────────────────────
 
   Future<void> initQueue() async {
+    await loadTemplate();
+
     final prefs = await SharedPreferences.getInstance();
     final String? queueData = prefs.getString(_prefsKey);
     if (queueData != null) {
@@ -80,10 +108,16 @@ class UploadManager extends ChangeNotifier {
         _queue.clear();
         for (var map in decoded) {
           final item = UploadItem.fromMap(map as Map<String, dynamic>);
-          // If an item was uploading or processing when the app closed, it's failed now
+          // If an item was uploading when the app closed, it might have actually
+          // finished or it might be truly interrupted. 
           if (item.status == UploadStatus.uploading || item.status == UploadStatus.processing) {
-            item.status = UploadStatus.failed;
-            item.errorMessage = 'Upload interrupted';
+            if (item.videoId != null) {
+              item.status = UploadStatus.success;
+              item.progress = 1.0;
+            } else {
+              item.status = UploadStatus.failed;
+              item.errorMessage = 'Upload interrupted (App closed)';
+            }
           }
           _queue.add(item);
         }
@@ -102,14 +136,19 @@ class UploadManager extends ChangeNotifier {
 
   List<UploadItem> get queue => List.unmodifiable(_queue);
 
-  List<UploadItem> get pendingOrUploading => 
+  List<UploadItem> get pendingOrUploading =>
       _queue.where((item) => item.status == UploadStatus.pending || item.status == UploadStatus.uploading).toList();
-      
-  List<UploadItem> get completed => 
+
+  List<UploadItem> get completed =>
       _queue.where((item) => item.status == UploadStatus.success).toList();
 
-  UploadItem? get currentUpload => 
-      _queue.cast<UploadItem?>().firstWhere((item) => item?.status == UploadStatus.uploading || item?.status == UploadStatus.processing, orElse: () => null);
+  UploadItem? get currentUpload =>
+      _queue.cast<UploadItem?>().firstWhere(
+        (item) => item?.status == UploadStatus.uploading || item?.status == UploadStatus.processing,
+        orElse: () => null,
+      );
+
+  // ── Enqueue ───────────────────────────────────────────────────────────────
 
   void enqueueUpload(
     String filePath, {
@@ -119,8 +158,8 @@ class UploadManager extends ChangeNotifier {
     List<String>? tags,
   }) {
     // Duplicate Upload Prevention
-    final isDuplicate = _queue.any((item) => 
-      item.filePath == filePath && 
+    final isDuplicate = _queue.any((item) =>
+      item.filePath == filePath &&
       (item.status == UploadStatus.success || item.status == UploadStatus.processing || item.status == UploadStatus.uploading)
     );
 
@@ -130,11 +169,14 @@ class UploadManager extends ChangeNotifier {
     }
 
     final finalTitle = title ?? 'DocsMe - ${DateTime.now().toIso8601String().split('T').first}';
+    // Use the saved template as default description if no custom one is provided.
+    final finalDescription = description ?? _defaultDescription;
+
     final newItem = UploadItem(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       filePath: filePath,
       title: finalTitle,
-      description: description ?? "Uploaded via DocsMe App",
+      description: finalDescription,
       tags: tags ?? const ["DocsMe", "Vlog", "Daily"],
       status: UploadStatus.pending,
     );
@@ -147,13 +189,26 @@ class UploadManager extends ChangeNotifier {
     }
   }
 
+  // ── Remove / Delete ───────────────────────────────────────────────────────
+
+  /// Removes an upload item from the queue by its ID.
+  void removeUpload(String itemId) {
+    _queue.removeWhere((item) => item.id == itemId);
+    _saveQueue();
+    notifyListeners();
+  }
+
+  // ── Resume ────────────────────────────────────────────────────────────────
+
   void resumeQueue() {
     _processQueue();
   }
 
+  // ── Process Queue ─────────────────────────────────────────────────────────
+
   Future<void> _processQueue() async {
     if (_isProcessing) return;
-    
+
     final pendingItems = _queue.where((item) => item.status == UploadStatus.pending || item.status == UploadStatus.failed).toList();
     if (pendingItems.isEmpty) return;
 
@@ -174,19 +229,20 @@ class UploadManager extends ChangeNotifier {
           privacyStatus: 'private',
           onProgress: (progress) {
             item.progress = progress;
-            notifyListeners(); // Don't save queue on every progress tick to avoid excessive disk I/O
+            notifyListeners();
           },
         );
 
         item.videoId = videoId;
-        item.status = UploadStatus.processing;
+
+        // The video IS on YouTube once the API returns a videoId.
+        // Mark as success immediately so the UI reflects the upload.
+        // YouTube will process the video in the background — this is normal
+        // and the user can already see/share the video.
+        item.status = UploadStatus.success;
+        item.progress = 1.0;
         _saveQueue();
         notifyListeners();
-        
-        // Start polling for processing status without blocking the queue completely if possible, 
-        // but since we process sequentially, we'll await it or do it async. 
-        // Let's do it asynchronously so the next upload can start.
-        _pollProcessingStatus(item);
 
       } catch (e) {
         item.status = UploadStatus.failed;
@@ -197,23 +253,5 @@ class UploadManager extends ChangeNotifier {
     }
 
     _isProcessing = false;
-  }
-
-  Future<void> _pollProcessingStatus(UploadItem item) async {
-    if (item.videoId == null) return;
-    
-    bool isComplete = false;
-    int attempts = 0;
-    
-    // Poll up to 60 times, once every 10 seconds (10 mins max)
-    while (!isComplete && attempts < 60) {
-      await Future.delayed(const Duration(seconds: 10));
-      isComplete = await YouTubeService().isVideoProcessingComplete(item.videoId!);
-      attempts++;
-    }
-    
-    item.status = UploadStatus.success;
-    _saveQueue();
-    notifyListeners();
   }
 }

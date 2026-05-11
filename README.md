@@ -23,6 +23,18 @@ Documenting your daily journey should be effortless. DocsMe simplifies the creat
 
 ---
 
+## ⚖️ Compliance & Legal
+
+DocsMe is built with Google OAuth 2.0 verification in mind. We provide professional, pre-formatted HTML legal documents in the `/Rights & Policies` directory:
+
+- **Landing Page**: `index.html`
+- **Privacy Policy**: `PrivacyPolicy.html`
+- **Terms of Service**: `TermsOfService.html`
+
+These documents are styled with the DocsMe "Gold Standard" aesthetic and are ready for hosting on **GitHub Pages**, **Netlify**, or **Firebase Hosting** to satisfy Google's App Verification requirements.
+
+---
+
 ## 🎨 Visual Identity: The "DocsMe" Palette
 
 DocsMe adheres to a signature **Gold Standard** color language:

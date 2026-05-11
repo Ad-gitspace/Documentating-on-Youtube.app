@@ -111,4 +111,19 @@ Every task or feature implementation MUST follow this rigorous execution cycle:
 - `lib/screens/`: Feature-specific views (Camera, Home, Library).
 - `lib/widgets/`: Atomic, reusable UI components (Glass cards, Nav bars).
 - `lib/core/`: Theming and shared constants.
+- `Rights & Policies/`: Legal documents (HTML) for Google OAuth verification and public hosting.
 - `ex-files/`: Reference assets and legacy documentation.
+
+---
+
+## ⚖️ Legal & Compliance
+
+DocsMe requires Google OAuth 2.0 verification. The following assets are maintained for compliance:
+
+- **index.html**: The application's public landing page.
+- **PrivacyPolicy.html**: Detailed data usage, storage, and user rights (YouTube API compliant).
+- **TermsOfService.html**: User agreement and YouTube TOS integration.
+
+### Deployment Standards
+- These files are designed for static hosting (GitHub Pages, Netlify, or Firebase Hosting).
+- Any changes to YouTube scopes in `AuthService` MUST be reflected in `PrivacyPolicy.html`.

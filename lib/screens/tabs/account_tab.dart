@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/constants/app_dimens.dart';
 import '../../../widgets/glass_card.dart';
 import '../../../services/auth_service.dart';
+import '../../../services/firebase_service.dart';
+import '../../../services/upload_manager.dart';
 
-/// Account Tab — user profile and app settings.
+/// Account Tab — user profile, name editing, description template, and settings.
 class AccountTab extends StatefulWidget {
   const AccountTab({super.key});
 
@@ -18,13 +21,104 @@ class _AccountTabState extends State<AccountTab> with AutomaticKeepAliveClientMi
   bool _appendDate = true;
   bool _autoUpload = false;
 
+  // Controllers
+  late TextEditingController _descriptionController;
+  late TextEditingController _nameController;
+
+  bool _isSavingTemplate = false;
+  bool _isSavingName = false;
+  bool _nameEditing = false;
+
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the description controller with the saved template.
+    final uploadManager = UploadManager();
+    _descriptionController = TextEditingController(
+      text: uploadManager.defaultDescription,
+    );
+    // Initialize the name controller with the current user's display name.
+    final displayName = _authService.currentUser?.displayName ?? 'Creator';
+    _nameController = TextEditingController(text: displayName);
+  }
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    _nameController.dispose();
+    super.dispose();
+  }
 
   Future<void> _handleSignOut() async {
     await _authService.signOut();
     if (mounted) {
       Navigator.of(context).pushReplacementNamed('/login');
+    }
+  }
+
+  Future<void> _saveTemplate() async {
+    final text = _descriptionController.text.trim();
+    if (text.isEmpty) return;
+
+    setState(() => _isSavingTemplate = true);
+    try {
+      await context.read<UploadManager>().saveTemplate(text);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Description template saved!'),
+            backgroundColor: AppColors.secondary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save: $e'),
+            backgroundColor: AppColors.errorContainer,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSavingTemplate = false);
+    }
+  }
+
+  Future<void> _saveName() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) return;
+
+    setState(() => _isSavingName = true);
+    try {
+      await FirebaseService().updateDisplayName(name);
+      if (mounted) {
+        setState(() => _nameEditing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Display name updated!'),
+            backgroundColor: AppColors.secondary,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update name: $e'),
+            backgroundColor: AppColors.errorContainer,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSavingName = false);
     }
   }
 
@@ -69,7 +163,7 @@ class _AccountTabState extends State<AccountTab> with AutomaticKeepAliveClientMi
                     ),
                     const SizedBox(height: AppDimens.lg),
 
-                    // Account Info
+                    // Account Info + Name Edit
                     _accountInfoCard(user),
                     const SizedBox(height: AppDimens.lg),
 
@@ -142,6 +236,7 @@ class _AccountTabState extends State<AccountTab> with AutomaticKeepAliveClientMi
           ),
           const SizedBox(height: AppDimens.lg),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Avatar
               Container(
@@ -164,13 +259,85 @@ class _AccountTabState extends State<AccountTab> with AutomaticKeepAliveClientMi
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      user?.displayName ?? 'Creator',
-                      style: AppTypography.bodyLg.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.onBackground,
+                    // ── Editable Display Name ────────────────────────────
+                    if (_nameEditing)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _nameController,
+                              autofocus: true,
+                              style: AppTypography.bodyLg.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.onBackground,
+                              ),
+                              decoration: InputDecoration(
+                                isDense: true,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 6),
+                                filled: true,
+                                fillColor: AppColors.surfaceContainerLowest,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                      color: AppColors.primary.withValues(alpha: 0.5)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide:
+                                      const BorderSide(color: AppColors.primary),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _isSavingName
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2, color: AppColors.primary),
+                                )
+                              : IconButton(
+                                  icon: const Icon(Icons.check_circle,
+                                      color: AppColors.secondary, size: 24),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  onPressed: _saveName,
+                                ),
+                          const SizedBox(width: 4),
+                          IconButton(
+                            icon: Icon(Icons.close,
+                                color: AppColors.onSurfaceVariant, size: 20),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            onPressed: () {
+                              _nameController.text =
+                                  user?.displayName ?? 'Creator';
+                              setState(() => _nameEditing = false);
+                            },
+                          ),
+                        ],
+                      )
+                    else
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              user?.displayName ?? 'Creator',
+                              style: AppTypography.bodyLg.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.onBackground,
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => setState(() => _nameEditing = true),
+                            child: Icon(Icons.edit,
+                                color: AppColors.primary, size: 18),
+                          ),
+                        ],
                       ),
-                    ),
                     const SizedBox(height: 4),
                     Text(
                       user?.email ?? 'Not signed in',
@@ -259,7 +426,7 @@ class _AccountTabState extends State<AccountTab> with AutomaticKeepAliveClientMi
           ),
           const SizedBox(height: AppDimens.sm),
           Text(
-            'This text will be added to every new upload.',
+            'This text will be added to every new upload as the default description.',
             style: AppTypography.bodySm,
           ),
           const SizedBox(height: AppDimens.md),
@@ -271,6 +438,7 @@ class _AccountTabState extends State<AccountTab> with AutomaticKeepAliveClientMi
               border: Border.all(color: AppColors.glassWhite10),
             ),
             child: TextField(
+              controller: _descriptionController,
               maxLines: 4,
               style: AppTypography.bodyLg,
               decoration: InputDecoration.collapsed(
@@ -284,18 +452,29 @@ class _AccountTabState extends State<AccountTab> with AutomaticKeepAliveClientMi
           const SizedBox(height: AppDimens.md),
           SizedBox(
             width: double.infinity,
-            child: TextButton(
-              onPressed: () {},
-              style: TextButton.styleFrom(
-                backgroundColor: AppColors.surfaceContainerHighest,
-                foregroundColor: AppColors.onSurface,
+            child: ElevatedButton.icon(
+              onPressed: _isSavingTemplate ? null : _saveTemplate,
+              icon: _isSavingTemplate
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Icon(Icons.save, size: 18),
+              label: Text(
+                _isSavingTemplate ? 'Saving…' : 'Save Template',
+                style: AppTypography.buttonText,
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppDimens.radiusFull),
-                  side: const BorderSide(color: AppColors.glassWhite10),
                 ),
+                elevation: 0,
               ),
-              child: Text('Save Template', style: AppTypography.buttonText),
             ),
           ),
         ],

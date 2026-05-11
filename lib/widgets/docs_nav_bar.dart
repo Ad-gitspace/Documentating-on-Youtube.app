@@ -43,7 +43,7 @@ class DocsNavBar extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(AppDimens.radiusFull),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+            filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
             child: Container(
               width: compact
                   ? MediaQuery.of(context).size.width * 0.5
